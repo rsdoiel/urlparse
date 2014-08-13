@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+    "strings"
 )
 
 var (
@@ -105,7 +106,7 @@ func init() {
 		help_usage      = "Display this help document."
 		protocol_usage  = "Display the protocol of URL (defaults to http)"
 		host_usage      = "Display the host (domain name) in URL."
-		port_usage      = "Display the port name in URL (assumes 80 for http, 443 for https)"
+		port_usage      = "Display the port name in URL (defaults to space if no port is set.)"
 		path_usage      = "Display the path after the hostname."
 		dir_usage       = "Display all but the last element of the path"
 		basename_usage  = "Display the base filename at the end of the path."
@@ -157,27 +158,38 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s%s", u.Host, use_delim)
 		full_display = false
 	}
+    if showPort == true {
+        if strings.Contains(u.Host, ":") == true {
+            cur := strings.LastIndex(u.Host, ":")
+            if  cur > -1 {
+                fmt.Fprintf(os.Stdout, "%s%s", u.Host[cur+1], use_delim)
+            } else {
+                fmt.Fprintf(os.Stdout, " %s", use_delim)
+            }
+        } else {
+            fmt.Fprintf(os.Stdout, " %s", use_delim)
+        }
+    }
 	if showPath == true {
 		fmt.Fprintf(os.Stdout, "%s%s", u.Path, use_delim)
 		full_display = false
 	}
 	if showBase == true {
-		fmt.Fprintf(os.Stdout, "%s%s", path.Base(u.Path))
+		fmt.Fprintf(os.Stdout, "%s%s", path.Base(u.Path), use_delim)
 		full_display = false
 	}
 	if showDir == true {
-		fmt.Fpritnf(os.Stdout, "%s%s", path.Dir(u.Path))
+		fmt.Fprintf(os.Stdout, "%s%s", path.Dir(u.Path), use_delim)
 		full_display = false
 	}
 	if showExtension == true {
-		fmt.Fpritnf(os.Stdout, "%s%s", path.Extention(u.Path))
+		fmt.Fprintf(os.Stdout, "%s%s", path.Ext(u.Path), use_delim)
 		full_display = false
 	}
 
 	if full_display == true {
-		fmt.Fprintf(os.Stdout, "%s%s%s%s%s%s%s",
-			u.Scheme, use_delim, u.Host, use_delim,
-			u.Port, use_delim, u.Path)
+		fmt.Fprintf(os.Stdout, "%s%s%s%s%s",
+			u.Scheme, use_delim, u.Host, use_delim, u.Path)
 	}
 	fmt.Fprintln(os.Stdout, "")
 	os.Exit(0)
