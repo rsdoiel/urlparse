@@ -27,7 +27,9 @@ var (
 	showBase      bool
 	showExtension bool
 	showMimeType  bool
+    envPrefix     = ""
 	delimiter     = "\t"
+    port          = "" 
 )
 
 var Usage = func(exit_code int, msg string) {
@@ -39,8 +41,13 @@ var Usage = func(exit_code int, msg string) {
  USAGE %s [OPTIONS] URL_TO_PARSE
 
  Display the parsed URL as delimited fields on one line.
+ The default parts to show are protocol, host and path.
 
  EXAMPLES
+
+ With no options returns "http\texample.com\t/my/page.html"
+
+     %s http://example.com/my/page.html
 
  Get protocol. Returns "http".
  
@@ -85,7 +92,7 @@ var Usage = func(exit_code int, msg string) {
 
 `, msg, os.Args[0], os.Args[0], os.Args[0],
 		os.Args[0], os.Args[0], os.Args[0],
-		os.Args[0], os.Args[0])
+		os.Args[0], os.Args[0], os.Args[0])
 
 	flag.VisitAll(func(f *flag.Flag) {
 		fmt.Fprintf(fh, "  -%s\t%s\n", f.Name, f.Usage)
@@ -100,6 +107,20 @@ var Usage = func(exit_code int, msg string) {
 	os.Exit(exit_code)
 }
 
+func exportEnv(varname, value string) {
+    ppid := os.Getppid()
+    fmt.Printf("DEBUG ppid: %d", ppid)
+    //pprocess := os.FindProcess(ppid)
+    //pprocess.SetEnv(varname, value)
+}
+
+func updateEnv(writeToEnv bool, varname string, value string) {
+    if writeToEnv == true {
+        fmt.Printf("DEBUG setting %s to %s\n", envPrefix+varname, value)
+        exportEnv(envPrefix + varname, value)
+    }
+}
+
 func init() {
 	const (
 		delimiter_usage = "Set the output delimited for parsed display. (defaults to tab)"
@@ -111,6 +132,7 @@ func init() {
 		dir_usage       = "Display all but the last element of the path"
 		basename_usage  = "Display the base filename at the end of the path."
 		extension_usage = "Display the filename extension (e.g. .html)."
+        env_usage       = "Set results as environment variables."
 	)
 
 	flag.StringVar(&delimiter, "delimiter", delimiter, delimiter_usage)
@@ -129,12 +151,15 @@ func init() {
 	flag.BoolVar(&showBase, "b", false, basename_usage)
 	flag.BoolVar(&showExtension, "extension", false, extension_usage)
 	flag.BoolVar(&showExtension, "e", false, extension_usage)
+    flag.StringVar(&envPrefix, "environment", envPrefix, env_usage)
+    flag.StringVar(&envPrefix, "E", envPrefix, env_usage)
 
 	flag.BoolVar(&help, "help", help, help_usage)
 	flag.BoolVar(&help, "h", help, help_usage)
 }
 
 func main() {
+    var results []string
 	flag.Parse()
 	if help == true {
 		Usage(0, "")
@@ -148,49 +173,54 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s", err)
 		os.Exit(1)
 	}
+
+    writeToEnv := false
 	use_delim := delimiter
-	full_display := true
+    if envPrefix != "" {
+        writeToEnv = true
+    }
 	if showProtocol == true {
-		fmt.Fprintf(os.Stdout, "%s%s", u.Scheme, use_delim)
-		full_display = false
+        results = append(results, u.Scheme)
+        updateEnv(writeToEnv, "PROTOCOL", u.Scheme)
 	}
 	if showHost == true {
-		fmt.Fprintf(os.Stdout, "%s%s", u.Host, use_delim)
-		full_display = false
+		results = append(results, u.Host)
+        updateEnv(writeToEnv, "HOST", u.Host)
 	}
-    if showPort == true {
-        if strings.Contains(u.Host, ":") == true {
-            cur := strings.LastIndex(u.Host, ":")
-            if  cur > -1 {
-                fmt.Fprintf(os.Stdout, "%s%s", u.Host[cur+1], use_delim)
-            } else {
-                fmt.Fprintf(os.Stdout, " %s", use_delim)
-            }
-        } else {
-            fmt.Fprintf(os.Stdout, " %s", use_delim)
-        }
+    if showPort == true && strings.Contains(u.Host, ":") == true {
+        cur := strings.LastIndex(u.Host, ":")
+        port = u.Host[cur+1:]
+        results = append(results, port)
+        updateEnv(writeToEnv, "PORT", port)
     }
 	if showPath == true {
-		fmt.Fprintf(os.Stdout, "%s%s", u.Path, use_delim)
-		full_display = false
+		results = append(results, u.Path)
+        updateEnv(writeToEnv, "PATH", u.Path)
 	}
 	if showBase == true {
-		fmt.Fprintf(os.Stdout, "%s%s", path.Base(u.Path), use_delim)
-		full_display = false
+		results = append(results, path.Base(u.Path))
+        updateEnv(writeToEnv, "BASE", path.Base(u.Path))
 	}
 	if showDir == true {
-		fmt.Fprintf(os.Stdout, "%s%s", path.Dir(u.Path), use_delim)
-		full_display = false
+		results = append(results, path.Dir(u.Path))
+        updateEnv(writeToEnv, "DIRECTORY", path.Dir(u.Path))
 	}
 	if showExtension == true {
-		fmt.Fprintf(os.Stdout, "%s%s", path.Ext(u.Path), use_delim)
-		full_display = false
+		results = append(results, path.Ext(u.Path))
+        updateEnv(writeToEnv, "EXTENSION", path.Ext(u.Path))
 	}
 
-	if full_display == true {
-		fmt.Fprintf(os.Stdout, "%s%s%s%s%s",
-			u.Scheme, use_delim, u.Host, use_delim, u.Path)
-	}
-	fmt.Fprintln(os.Stdout, "")
+	if len(results) == 0 {
+        if writeToEnv == true {
+            updateEnv(writeToEnv, "PROTOCOL", u.Scheme)
+            updateEnv(writeToEnv, "HOST", u.Host)
+            updateEnv(writeToEnv, "PATH", u.Path)
+        } else {
+		    fmt.Fprintf(os.Stdout, "%s%s%s%s%s%s",
+			    u.Scheme, use_delim, u.Host, use_delim, u.Path)
+	    }
+    } else {
+        fmt.Fprint(os.Stdout, strings.Join(results, use_delim))
+    }
 	os.Exit(0)
 }
