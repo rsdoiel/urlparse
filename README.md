@@ -58,7 +58,8 @@ $WS\_PORT, $WS\_PATH, $WS\_BASENAME, $WS\_EXTENSION.
 Without options urlparse returns all fields separated by a tab.
 
 +  -b, -basename	Display the base filename at the end of the path.
-+  -d, -delimiter	Set the output delimited for parsed display. (defaults to tab)
++  -D, -delimiter	Set the output delimited for parsed display. (defaults to tab)
++  -d, --directory    Display all but the last element of the path
 +  -e, -extension	Display the filename extension (e.g. .html).
 +  -H, -host	Display the host (domain name) in URL.
 +  -p, -path	Display the path after the hostname.
@@ -70,3 +71,4 @@ Without options urlparse returns all fields separated by a tab.
 Copyright (c) 2014 All rights reserved.
 Released under the Simplified BSD License
 See: http://opensource.org/licenses/bsd-license.php 
+

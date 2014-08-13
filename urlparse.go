@@ -9,32 +9,32 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    "os"
-    //"errors"
-    "net/url"
+	"flag"
+	"fmt"
+	"net/url"
+	"os"
+	"path"
 )
 
 var (
-    help bool
-    showProtocol bool
-    showHost bool
-    showPort bool
-    showPath bool
-    showBasename bool
-    showExtension bool
-    showMimeType bool
-    delimiter = "\t"
+	help          bool
+	showProtocol  bool
+	showHost      bool
+	showPort      bool
+	showPath      bool
+	showDir       bool
+	showBase      bool
+	showExtension bool
+	showMimeType  bool
+	delimiter     = "\t"
 )
 
-
 var Usage = func(exit_code int, msg string) {
-     var fh = os.Stderr
-     if exit_code == 0 {
-         fh = os.Stdout
-     }
-     fmt.Fprintf(fh, `%s
+	var fh = os.Stderr
+	if exit_code == 0 {
+		fh = os.Stdout
+	}
+	fmt.Fprintf(fh, `%s
  USAGE %s [OPTIONS] URL_TO_PARSE
 
  Display the parsed URL as delimited fields on one line.
@@ -83,80 +83,102 @@ var Usage = func(exit_code int, msg string) {
  OPTIONS
 
 `, msg, os.Args[0], os.Args[0], os.Args[0],
-                 os.Args[0], os.Args[0], os.Args[0],
-                 os.Args[0], os.Args[0])
+		os.Args[0], os.Args[0], os.Args[0],
+		os.Args[0], os.Args[0])
 
-    flag.VisitAll(func(f *flag.Flag) {
-         fmt.Fprintf(fh, "  -%s\t%s\n", f.Name, f.Usage)
-    })
+	flag.VisitAll(func(f *flag.Flag) {
+		fmt.Fprintf(fh, "  -%s\t%s\n", f.Name, f.Usage)
+	})
 
-    fmt.Fprintf(fh, `
+	fmt.Fprintf(fh, `
 
  Copyright (c) 2014 All rights reserved.
  Released under the Simplified BSD License
  See: http://opensource.org/licenses/bsd-license.php 
 `)
-    os.Exit(exit_code)
+	os.Exit(exit_code)
 }
 
 func init() {
-    const (
-        delimiter_usage = "Set the output delimited for parsed display. (defaults to tab)"
-        help_usage  = "Display this help document."
-        protocol_usage = "Display the protocol of URL (defaults to http)"
-        host_usage = "Display the host (domain name) in URL."
-        port_usage   = "Display the port name in URL (assumes 80 for http, 443 for https)"
-        path_usage   = "Display the path after the hostname."
-        basename_usage = "Display the base filename at the end of the path."
-        extension_usage = "Display the filename extension (e.g. .html)."
-    )
+	const (
+		delimiter_usage = "Set the output delimited for parsed display. (defaults to tab)"
+		help_usage      = "Display this help document."
+		protocol_usage  = "Display the protocol of URL (defaults to http)"
+		host_usage      = "Display the host (domain name) in URL."
+		port_usage      = "Display the port name in URL (assumes 80 for http, 443 for https)"
+		path_usage      = "Display the path after the hostname."
+		dir_usage       = "Display all but the last element of the path"
+		basename_usage  = "Display the base filename at the end of the path."
+		extension_usage = "Display the filename extension (e.g. .html)."
+	)
 
-    flag.StringVar(&delimiter, "delimiter", delimiter, delimiter_usage)
-    flag.StringVar(&delimiter, "d", delimiter, delimiter_usage)
-    flag.BoolVar(&showProtocol, "protocol", false, protocol_usage)
-    flag.BoolVar(&showProtocol, "T", false, protocol_usage)
-    flag.BoolVar(&showHost, "host", false, host_usage)
-    flag.BoolVar(&showHost, "H", false, host_usage)
-    flag.BoolVar(&showPort, "port", false, port_usage)
-    flag.BoolVar(&showPort, "P", false, port_usage)
-    flag.BoolVar(&showPath, "path", false, path_usage)
-    flag.BoolVar(&showPath, "p", false, path_usage)
-    flag.BoolVar(&showBasename, "basename", false, basename_usage)
-    flag.BoolVar(&showBasename, "b", false, basename_usage)
-    flag.BoolVar(&showExtension, "extension", false, extension_usage)
-    flag.BoolVar(&showExtension, "e", false, extension_usage)
+	flag.StringVar(&delimiter, "delimiter", delimiter, delimiter_usage)
+	flag.StringVar(&delimiter, "D", delimiter, delimiter_usage)
+	flag.BoolVar(&showProtocol, "protocol", false, protocol_usage)
+	flag.BoolVar(&showProtocol, "T", false, protocol_usage)
+	flag.BoolVar(&showHost, "host", false, host_usage)
+	flag.BoolVar(&showHost, "H", false, host_usage)
+	flag.BoolVar(&showPort, "port", false, port_usage)
+	flag.BoolVar(&showPort, "P", false, port_usage)
+	flag.BoolVar(&showPath, "path", false, path_usage)
+	flag.BoolVar(&showPath, "p", false, path_usage)
+	flag.BoolVar(&showDir, "directory", false, basename_usage)
+	flag.BoolVar(&showDir, "d", false, basename_usage)
+	flag.BoolVar(&showBase, "base", false, basename_usage)
+	flag.BoolVar(&showBase, "b", false, basename_usage)
+	flag.BoolVar(&showExtension, "extension", false, extension_usage)
+	flag.BoolVar(&showExtension, "e", false, extension_usage)
 
-    flag.BoolVar(&help, "help", help, help_usage)
-    flag.BoolVar(&help, "h", help, help_usage)
+	flag.BoolVar(&help, "help", help, help_usage)
+	flag.BoolVar(&help, "h", help, help_usage)
 }
 
 func main() {
-    flag.Parse()
-    if help == true {
-        Usage(0, "")
-    }
-    url_to_parse := flag.Arg(0)
-    if url_to_parse == "" {
-        Usage(1, "Missing URL to parse")
-    }
-    u, err := url.Parse(url_to_parse)
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "%s", err)
-        os.Exit(1)
-    }
-    use_delim := delimiter
-    if showProtocol == true {
-        fmt.Fprintf(os.Stdout, "%s%s", u.Scheme, use_delim)
-    }
-    if showHost == true {
-        fmt.Fprintf(os.Stdout, "%s%s", u.Host, use_delim)
-    }
-    if showPath == true {
-        fmt.Fprintf(os.Stdout, "%s%s", u.Path, use_delim)
-    }
-    if showBasename == true {
-        fmt.Fprintf(is.Stdout, "%s%s", path.Basename(u.Path))
-    }
-    fmt.Fprintln(os.Stdout, "")
-    os.Exit(0)
+	flag.Parse()
+	if help == true {
+		Usage(0, "")
+	}
+	url_to_parse := flag.Arg(0)
+	if url_to_parse == "" {
+		Usage(1, "Missing URL to parse")
+	}
+	u, err := url.Parse(url_to_parse)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s", err)
+		os.Exit(1)
+	}
+	use_delim := delimiter
+	full_display := true
+	if showProtocol == true {
+		fmt.Fprintf(os.Stdout, "%s%s", u.Scheme, use_delim)
+		full_display = false
+	}
+	if showHost == true {
+		fmt.Fprintf(os.Stdout, "%s%s", u.Host, use_delim)
+		full_display = false
+	}
+	if showPath == true {
+		fmt.Fprintf(os.Stdout, "%s%s", u.Path, use_delim)
+		full_display = false
+	}
+	if showBase == true {
+		fmt.Fprintf(os.Stdout, "%s%s", path.Base(u.Path))
+		full_display = false
+	}
+	if showDir == true {
+		fmt.Fpritnf(os.Stdout, "%s%s", path.Dir(u.Path))
+		full_display = false
+	}
+	if showExtension == true {
+		fmt.Fpritnf(os.Stdout, "%s%s", path.Extention(u.Path))
+		full_display = false
+	}
+
+	if full_display == true {
+		fmt.Fprintf(os.Stdout, "%s%s%s%s%s%s%s",
+			u.Scheme, use_delim, u.Host, use_delim,
+			u.Port, use_delim, u.Path)
+	}
+	fmt.Fprintln(os.Stdout, "")
+	os.Exit(0)
 }
