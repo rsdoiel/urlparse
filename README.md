@@ -51,7 +51,7 @@ separated by a tab.
 +  -e, -extension	Display the filename extension (e.g. .html).
 +  -H, -host	Display the host (domain name) in URL.
 +  -p, -path	Display the path after the hostname.
-+  -T, -protocol	Display the protocol of URL (defaults to http)
++  -P, -protocol	Display the protocol of URL (defaults to http)
 
 +  -h, -help	Display this help document.
 

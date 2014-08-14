@@ -111,7 +111,7 @@ func init() {
 	flag.StringVar(&delimiter, "delimiter", delimiter, delimiter_usage)
 	flag.StringVar(&delimiter, "D", delimiter, delimiter_usage)
 	flag.BoolVar(&showProtocol, "protocol", false, protocol_usage)
-	flag.BoolVar(&showProtocol, "T", false, protocol_usage)
+	flag.BoolVar(&showProtocol, "P", false, protocol_usage)
 	flag.BoolVar(&showHost, "host", false, host_usage)
 	flag.BoolVar(&showHost, "H", false, host_usage)
 	flag.BoolVar(&showPath, "path", false, path_usage)
