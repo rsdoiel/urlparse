@@ -25,11 +25,6 @@ Get host or domain name.  Returns "example.com".
      urlparse --host http://example.com/my/page.html
 
 
-Get port.  Returns "8080".
-
-     urlparse --port http://example.com:8080/my/page.html
-
-
 Get path. Returns "/my/page.html".
  
      urlparse --path http://example.com/my/page.html
@@ -45,17 +40,10 @@ Get extension. Returns ".html".
      urlparse --extension http://example.com/my/page.html
 
 
-Parse a URL setting environment variables beginning with 'WS_'
-
-     urlparse --env=WS_ http://example.com/my/page.html
-
-The environment variables would be $WS\_PROTOCOL, $WS\_HOST,
-$WS\_PORT, $WS\_PATH, $WS\_BASENAME, $WS\_EXTENSION.
-
-
 ## OPTIONS
 
-Without options urlparse returns all fields separated by a tab.
+Without options urlparse returns protocol, host and path fields 
+separated by a tab.
 
 +  -b, -basename	Display the base filename at the end of the path.
 +  -D, -delimiter	Set the output delimited for parsed display. (defaults to tab)
@@ -63,7 +51,6 @@ Without options urlparse returns all fields separated by a tab.
 +  -e, -extension	Display the filename extension (e.g. .html).
 +  -H, -host	Display the host (domain name) in URL.
 +  -p, -path	Display the path after the hostname.
-+  -P, -port	Display the port name in URL (assumes 80 for http, 443 for https)
 +  -T, -protocol	Display the protocol of URL (defaults to http)
 
 +  -h, -help	Display this help document.
