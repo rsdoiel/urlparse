@@ -80,13 +80,12 @@ var Usage = func(exit_code int, msg string) {
 
 `, msg, os.Args[0], os.Args[0], os.Args[0],
 		os.Args[0], os.Args[0], os.Args[0],
-		os.Args[0], os.Args[0], os.Args[0])
-
+		os.Args[0])
 	flag.VisitAll(func(f *flag.Flag) {
 		fmt.Fprintf(fh, "  -%s\t%s\n", f.Name, f.Usage)
 	})
 
-	fmt.Fprintf(fh, `
+	fmt.Fprintln(fh, `
 
  Copyright (c) 2014 All rights reserved.
  Released under the Simplified BSD License
