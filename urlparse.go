@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path"
-    "strings"
+	"strings"
 )
 
 var (
@@ -27,11 +27,11 @@ var (
 	showBase      bool
 	showExtension bool
 	showMimeType  bool
-    envPrefix     = ""
+	envPrefix     = ""
 	delimiter     = "\t"
 )
 
-var Usage = func(exit_code int, msg string) {
+var usage = func(exit_code int, msg string) {
 	var fh = os.Stderr
 	if exit_code == 0 {
 		fh = os.Stdout
@@ -94,57 +94,56 @@ var Usage = func(exit_code int, msg string) {
 	os.Exit(exit_code)
 }
 
-
 func init() {
 	const (
-		delimiter_usage = "Set the output delimited for parsed display. (defaults to tab)"
-		help_usage      = "Display this help document."
-		protocol_usage  = "Display the protocol of URL (defaults to http)"
-		host_usage      = "Display the hostname (and port if specified) found in URL."
-		path_usage      = "Display the path after the hostname."
-		dir_usage       = "Display all but the last element of the path"
-		basename_usage  = "Display the base filename at the end of the path."
-		extension_usage = "Display the filename extension (e.g. .html)."
+		delimiterUsage = "Set the output delimited for parsed display. (defaults to tab)"
+		helpUsage      = "Display this help document."
+		protocolUsage  = "Display the protocol of URL (defaults to http)"
+		hostUsage      = "Display the hostname (and port if specified) found in URL."
+		pathUsage      = "Display the path after the hostname."
+		dirUsage       = "Display all but the last element of the path"
+		basenameUsage  = "Display the base filename at the end of the path."
+		extensionUsage = "Display the filename extension (e.g. .html)."
 	)
 
-	flag.StringVar(&delimiter, "delimiter", delimiter, delimiter_usage)
-	flag.StringVar(&delimiter, "D", delimiter, delimiter_usage)
-	flag.BoolVar(&showProtocol, "protocol", false, protocol_usage)
-	flag.BoolVar(&showProtocol, "P", false, protocol_usage)
-	flag.BoolVar(&showHost, "host", false, host_usage)
-	flag.BoolVar(&showHost, "H", false, host_usage)
-	flag.BoolVar(&showPath, "path", false, path_usage)
-	flag.BoolVar(&showPath, "p", false, path_usage)
-	flag.BoolVar(&showDir, "directory", false, basename_usage)
-	flag.BoolVar(&showDir, "d", false, basename_usage)
-	flag.BoolVar(&showBase, "base", false, basename_usage)
-	flag.BoolVar(&showBase, "b", false, basename_usage)
-	flag.BoolVar(&showExtension, "extension", false, extension_usage)
-	flag.BoolVar(&showExtension, "e", false, extension_usage)
+	flag.StringVar(&delimiter, "delimiter", delimiter, delimiterUsage)
+	flag.StringVar(&delimiter, "D", delimiter, delimiterUsage)
+	flag.BoolVar(&showProtocol, "protocol", false, protocolUsage)
+	flag.BoolVar(&showProtocol, "P", false, protocolUsage)
+	flag.BoolVar(&showHost, "host", false, hostUsage)
+	flag.BoolVar(&showHost, "H", false, hostUsage)
+	flag.BoolVar(&showPath, "path", false, pathUsage)
+	flag.BoolVar(&showPath, "p", false, pathUsage)
+	flag.BoolVar(&showDir, "directory", false, basenameUsage)
+	flag.BoolVar(&showDir, "d", false, basenameUsage)
+	flag.BoolVar(&showBase, "base", false, basenameUsage)
+	flag.BoolVar(&showBase, "b", false, basenameUsage)
+	flag.BoolVar(&showExtension, "extension", false, extensionUsage)
+	flag.BoolVar(&showExtension, "e", false, extensionUsage)
 
-	flag.BoolVar(&help, "help", help, help_usage)
-	flag.BoolVar(&help, "h", help, help_usage)
+	flag.BoolVar(&help, "help", help, helpUsage)
+	flag.BoolVar(&help, "h", help, helpUsage)
 }
 
 func main() {
-    var results []string
+	var results []string
 	flag.Parse()
 	if help == true {
-		Usage(0, "")
+		usage(0, "")
 	}
-	url_to_parse := flag.Arg(0)
-	if url_to_parse == "" {
-		Usage(1, "Missing URL to parse")
+	urlToParse := flag.Arg(0)
+	if urlToParse == "" {
+		usage(1, "Missing URL to parse")
 	}
-	u, err := url.Parse(url_to_parse)
+	u, err := url.Parse(urlToParse)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s", err)
 		os.Exit(1)
 	}
 
-	use_delim := delimiter
+	useDelim := delimiter
 	if showProtocol == true {
-        results = append(results, u.Scheme)
+		results = append(results, u.Scheme)
 	}
 	if showHost == true {
 		results = append(results, u.Host)
@@ -164,9 +163,9 @@ func main() {
 
 	if len(results) == 0 {
 		fmt.Fprintf(os.Stdout, "%s%s%s%s%s",
-			u.Scheme, use_delim, u.Host, use_delim, u.Path)
-    } else {
-        fmt.Fprint(os.Stdout, strings.Join(results, use_delim))
-    }
+			u.Scheme, useDelim, u.Host, useDelim, u.Path)
+	} else {
+		fmt.Fprint(os.Stdout, strings.Join(results, useDelim))
+	}
 	os.Exit(0)
 }
