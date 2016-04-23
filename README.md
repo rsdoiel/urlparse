@@ -55,6 +55,17 @@ separated by a tab.
 
 +  -h, -help	Display this help document.
 
+## Installation
+
+_urlparse_ can be installed with the *go get* command.
+
+```
+    go get github.com/rsdoiel/urlparse/...
+```
+
+
+## License
+
 Copyright (c) 2014 All rights reserved.
 Released under the Simplified BSD License
 See: http://opensource.org/licenses/bsd-license.php 
