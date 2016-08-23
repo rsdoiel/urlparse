@@ -13,5 +13,17 @@ clean:
 	if [ -d bin ]; then rm -fR bin; fi
 	if [ -d dist ]; then rm -fR dist; fi
 
+save:
+	./mk-website.bash
+	git commit -am "Quick save"
+	git push origin master
+
+website:
+	./mk-website.bash
+
 release:
-	./mk-release.sh
+	./mk-release.bash
+
+publish:
+	./mk-website.bash
+	./publish.bash
